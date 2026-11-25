@@ -3,13 +3,17 @@ export default class HashMap {
         this.loadFactor = loadFactor;
         this.capacity = capacity;
         this.threshold = this.capacity * this.loadFactor;
-        this.buckets = new Array(this.capacity).fill([]);
+        this.buckets = Array.from(
+                        { length: this.capacity },
+                        () => []
+                    );
     } 
 
     hash(key) {
         let hashCode = 0;
 
         const primeNumber = 31;
+
         for (let i = 0; i < key.length; i++) {
             hashCode = primeNumber * hashCode + key.charCodeAt(i);
         }
@@ -17,41 +21,26 @@ export default class HashMap {
         return hashCode;
     }
 
-    set(key, value) {
-        // if there is no key
-        let hashvalue = this.hash
-        let idx = hashvalue % this.capacity
+    set(key, value) 
+    {
+        let hashvalue = this.hash(key);
+        let idx = hashvalue % this.capacity;
+        let bucket = this.buckets[idx];
 
-        if (this.length()<this.capacity)
-        {
-            // get the bucket 
-            let bucket = this.buckets[idx]
-
-            // if key isnt alreay present
-            if (!this.has(key))
-            {
-                // since bucket has no key, append the firt key value in bucket
-                this.buckets[idx].push([key,value])
-            }
-
-            else{
-                // if key is already present change the value 
-                for (let i = 0; i< bucket.length; i++)
-                {
-                    // compare the key of each key value pair 
-                    if (bucket[i][0]==key)
-                    {
-                        // return the value
-                        this.buckets[idx][i][1] = value;
-                    }
-                }
+        // Check if key already exists
+        for (let i = 0; i < bucket.length; i++) {
+            if (bucket[i][0] === key) {
+                bucket[i][1] = value;
+                return;
             }
         }
-        else
-        {
-            console.log("Capacity full")
+
+        // Insert new key if below threshold
+        if (this.length() < this.threshold) {
+            bucket.push([key, value]);
+        } else {
+            console.log("Capacity full");
         }
-        
     }
 
     get(key)
@@ -77,18 +66,17 @@ export default class HashMap {
     }
 
     has(key)
-    {   if (this.length() != 0)
-        {
-            let key_list = this.keys()
-            for (let i = 0; i< key_list.length; i++)
-            {
-                if (key_list[i] == key)
-                {
-                    return true
-                }
+    {  
+        let idx = this.hash(key) % this.capacity;
+        let bucket = this.buckets[idx];
+
+        for (let i = 0; i < bucket.length; i++) {
+            if (bucket[i][0] === key) {
+                return true;
             }
         }
-        return false
+
+        return false;
     }
 
     remove(key)
@@ -108,6 +96,7 @@ export default class HashMap {
                 {
                     // if key found then remove the key value pair from hashmap
                     this.buckets[idx].splice(i,1)
+                    return
                 }
             }
         }
@@ -131,7 +120,10 @@ export default class HashMap {
     clear()
     {
         // reset the hashmap or clear the hash map
-        this.buckets = new Array(this.capacity).fill([]);
+        this.buckets = Array.from(
+                        { length: this.capacity },
+                        () => []
+                    );
     }
 
     keys()
@@ -147,8 +139,8 @@ export default class HashMap {
             for (let j = 0; j< bucket.length; j++)
             {
                 // key_value pair 
-                pair = bucket[j]
-                key = pair[0]
+                let pair = bucket[j]
+                let key = pair[0]
                 key_list.push(key)
             }
         }
@@ -168,11 +160,11 @@ export default class HashMap {
             for (let j = 0; j< bucket.length; j++)
             {
                 // key_value pair 
-                pair = bucket[j]
+                let pair = bucket[j]
 
                 // values 
-                value = pair[1]
-                key_list.push(value)
+                let value = pair[1]
+                value_list.push(value)
             }
         }
         return value_list
@@ -185,16 +177,14 @@ export default class HashMap {
 
         for (let i = 0; i< bucket_list.length; i++)
         {
-            bucket = bucket_list[i]
-            if (bucket != [])
-            {
+            let bucket = bucket_list[i]
                 // loop through the bucket
                 for (let j = 0; j < bucket.length; j++)
                 {
-                    pair = bucket[j]
+                    let pair = bucket[j]
                     entry_list.push(pair)
                 }
-            }
+            
         }
         return entry_list
     }
