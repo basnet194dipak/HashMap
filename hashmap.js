@@ -21,8 +21,8 @@ export default class HashMap {
         return hashCode;
     }
 
-    set(key, value) 
-    {
+    
+    set(key, value) {
         let hashvalue = this.hash(key);
         let idx = hashvalue % this.capacity;
         let bucket = this.buckets[idx];
@@ -35,13 +35,17 @@ export default class HashMap {
             }
         }
 
-        // Insert new key if below threshold
-        if (this.length() < this.threshold) {
-            bucket.push([key, value]);
-        } else {
-            console.log("Capacity full");
+        // Check whether inserting would exceed the load factor
+        if ((this.length() + 1) / this.capacity > this.loadFactor) {
+            this.resize();
+
+            // Recalculate index after resizing
+            idx = this.hash(key) % this.capacity;
         }
-    }
+
+        // Insert new key-value pair
+        this.buckets[idx].push([key, value]);
+}
 
     get(key)
     {
@@ -187,6 +191,37 @@ export default class HashMap {
             
         }
         return entry_list
+    }
+
+    
+    resize() {
+        // Store the existing buckets
+        let oldBuckets = this.buckets;
+
+        // Double the capacity
+        this.capacity *= 2;
+
+        // Recalculate threshold
+        this.threshold = this.capacity * this.loadFactor;
+
+        // Create new empty buckets
+        this.buckets = Array.from(
+            { length: this.capacity },
+            () => []
+        );
+
+        // Rehash all existing entries
+        for (let i = 0; i < oldBuckets.length; i++) {
+            let bucket = oldBuckets[i];
+
+            for (let j = 0; j < bucket.length; j++) {
+                let [key, value] = bucket[j];
+
+                let idx = this.hash(key) % this.capacity;
+
+                this.buckets[idx].push([key, value]);
+            }
+        }
     }
 
 }
