@@ -1,5 +1,4 @@
-import { HashMap } from "./hashmap";
-
+import HashMap from "./hashmap.js";
 let loadFactor = 0.75;
 let capacity = 16
 
